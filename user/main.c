@@ -33,7 +33,7 @@
 #include "beep.h"
 #include "key.h"
 #include "usart.h"
-
+#include "Electromotor.h"
 //配置库
 #include "Config.h"
 //C库
@@ -85,6 +85,8 @@ void Hardware_Init(void)
 	
 	Led_Init();										//LED初始化
 	
+	Electromotor_Init();							//电机驱动初始化
+
 	//Beep_Init();									//蜂鸣器初始化
 	
 	//Key_Init();										//按键初始化
@@ -110,20 +112,20 @@ int main(void)
 {
 		
 	unsigned short timeCount = 0;	//发送间隔变量	
-	unsigned char *dataPtr = NULL;
+	char *dataPtr = NULL;
 	
 	Hardware_Init();					//初始化外围硬件
 	ESP8266_Init();						//初始化ESP8266	
-	//OneNET_RegisterDevice();	//设备注册，通过算法获取登录KEY	
-	UsartPrintf(USART_DEBUG, "Connect MQTTs Server...\r\n");
 	
-	while(ESP8266_SendCmd(ESP8266_ONENET_INFO, "CONNECT")) //接入OneNET MQTTS服务器
-		DelayXms(500);
+	UsartPrintf(USART_DEBUG, "AT+QMTSUB=0,1,\"$sys/470285/my_first_device/cmd/#\",0\r\n");
 	
-	while(OneNet_DevLink())			//接入OneNET
-		DelayXms(500);
+	while(ESP8266_SendCmd("AT+QMTSUB=0,1,\"$sys/470285/my_first_device/cmd/#\",0\r\n","OK"))//消息订阅
+	DelayXms(500);
 	
-	OneNET_Subscribe("$sys/%s/%s/cmd/#", PROID, DEVICE_NAME);					//向平台发送订阅请求(便于后续接收系统下发指令)
+	//UsartPrintf(USART_DEBUG, "1111111");
+	
+	Electromotor_Enable_Set(Electromotor_ON);
+	Electromotor_Direction_Set(Electromotor_ON);
 	
 	while(1)
 	{
@@ -137,13 +139,23 @@ int main(void)
 			led_status.LedB12Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_12);
 			led_status.LedB13Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_13);
 			led_status.LedB14Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_14);
-			led_status.LedB15Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_15);		
-			UsartPrintf(USART_DEBUG, "OneNet_SendData\r\n");			
+			led_status.LedB15Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_15);	
+
+			//UsartPrintf(USART_DEBUG, "OneNet_SendData\r\n");			
 			OneNet_SendData();									//向平台发送数据			
 			DelayXms(10);			
 			//OneNet_ping();									  //心跳请求		
 			timeCount = 0;
 			ESP8266_Clear();										//清空缓存
+		}
+		
+		if(timeCount%2==0)									//发送间隔5s
+		{
+			Electromotor_Pulse_Set(Electromotor_ON);	
+		}
+		else
+		{
+			Electromotor_Pulse_Set(Electromotor_OFF);
 		}
 					
 		dataPtr = ESP8266_GetIPD(0);					//获取ONENET平台返回的数据
@@ -352,6 +364,21 @@ void GPIO_Configuration(void)
 		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 		GPIO_Init(GPIOB, &GPIO_InitStructure);
 	
+	  //步进电机控制
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;					//GPIOC13-使能
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_Init(GPIOC, &GPIO_InitStructure);
+		
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;					//GPIOC14-方向
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_Init(GPIOC, &GPIO_InitStructure);
+		
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;					//GPIOC15-脉冲
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_Init(GPIOC, &GPIO_InitStructure);
                  //SWJ_CFG
     //AFIO->MAPR =(0x02<<24);
     

@@ -137,7 +137,7 @@ void Usart2_Init(unsigned int baud)
 *	ËµÃ÷£º		
 ************************************************************
 */
-void Usart_SendString(USART_TypeDef *USARTx, unsigned char *str, unsigned short len)
+void Usart_SendString(USART_TypeDef *USARTx, char *str, unsigned short len)
 {
 
 	unsigned short count = 0;

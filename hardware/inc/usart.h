@@ -12,7 +12,7 @@ void Usart1_Init(unsigned int baud);
 
 void Usart2_Init(unsigned int baud);
 
-void Usart_SendString(USART_TypeDef *USARTx, unsigned char *str, unsigned short len);
+void Usart_SendString(USART_TypeDef *USARTx,  char *str, unsigned short len);
 
 void UsartPrintf(USART_TypeDef *USARTx, char *fmt,...);
 

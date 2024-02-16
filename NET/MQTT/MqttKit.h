@@ -29,7 +29,7 @@
 typedef struct Buffer
 {
 	
-	uint8	*_data;		//协议数据
+	char	*_data;		//协议数据
 	
 	uint32	_len;		//写入的数据长度
 	
@@ -105,7 +105,7 @@ enum MqttConnectFlag
 void MQTT_DeleteBuffer(MQTT_PACKET_STRUCTURE *mqttPacket);
 
 /*--------------------------------解包--------------------------------*/
-uint8 MQTT_UnPacketRecv(uint8 *dataPtr);
+uint8 MQTT_UnPacketRecv(char *dataPtr);
 
 /*--------------------------------登录组包--------------------------------*/
 uint8 MQTT_PacketConnect(const int8 *user, const int8 *password, const int8 *devid,
@@ -117,7 +117,7 @@ uint8 MQTT_PacketConnect(const int8 *user, const int8 *password, const int8 *dev
 uint1 MQTT_PacketDisConnect(MQTT_PACKET_STRUCTURE *mqttPacket);
 
 /*--------------------------------连接响应解包--------------------------------*/
-uint8 MQTT_UnPacketConnectAck(uint8 *rev_data);
+uint8 MQTT_UnPacketConnectAck(char *rev_data);
 
 /*--------------------------------数据点上传组包--------------------------------*/
 uint1 MQTT_PacketSaveData(const int8 *pro_id, const char *dev_name,
@@ -127,7 +127,7 @@ uint1 MQTT_PacketSaveData(const int8 *pro_id, const char *dev_name,
 uint1 MQTT_PacketSaveBinData(const int8 *name, int16 file_len, MQTT_PACKET_STRUCTURE *mqttPacket);
 
 /*--------------------------------命令下发解包--------------------------------*/
-uint8 MQTT_UnPacketCmd(uint8 *rev_data, int8 **cmdid, int8 **req, uint16 *req_len);
+uint8 MQTT_UnPacketCmd(char *rev_data, int8 **cmdid, int8 **req, uint16 *req_len);
 
 /*--------------------------------命令回复组包--------------------------------*/
 uint1 MQTT_PacketCmdResp(const int8 *cmdid, const int8 *req, MQTT_PACKET_STRUCTURE *mqttPacket);
@@ -151,7 +151,7 @@ uint8 MQTT_PacketPublish(uint16 pkt_id, const int8 *topic,
 						MQTT_PACKET_STRUCTURE *mqttPacket);
 
 /*--------------------------------发布消息回复解包--------------------------------*/
-uint8 MQTT_UnPacketPublish(uint8 *rev_data, int8 **topic, uint16 *topic_len, int8 **payload, uint16 *payload_len, uint8 *qos, uint16 *pkt_id);
+uint8 MQTT_UnPacketPublish(char *rev_data, int8 **topic, uint16 *topic_len, int8 **payload, uint16 *payload_len, uint8 *qos, uint16 *pkt_id);
 
 /*--------------------------------发布消息的Ack组包--------------------------------*/
 uint1 MQTT_PacketPublishAck(uint16 pkt_id, MQTT_PACKET_STRUCTURE *mqttPacket);

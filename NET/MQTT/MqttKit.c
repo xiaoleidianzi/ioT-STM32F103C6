@@ -61,7 +61,7 @@ void MQTT_NewBuffer(MQTT_PACKET_STRUCTURE *mqttPacket, uint32 size)
 	{
 		mqttPacket->_memFlag = MEM_FLAG_ALLOC;
 		
-		mqttPacket->_data = (uint8 *)MQTT_MallocBuffer(size);
+		mqttPacket->_data = (char *)MQTT_MallocBuffer(size);
 		if(mqttPacket->_data != NULL)
 		{
 			mqttPacket->_len = 0;
@@ -111,7 +111,7 @@ void MQTT_DeleteBuffer(MQTT_PACKET_STRUCTURE *mqttPacket)
 
 }
 
-int32 MQTT_DumpLength(size_t len, uint8 *buf)
+int32 MQTT_DumpLength(size_t len, char *buf)
 {
 	
 	int32 i = 0;
@@ -134,11 +134,11 @@ int32 MQTT_DumpLength(size_t len, uint8 *buf)
 	return -1;
 }
 
-int32 MQTT_ReadLength(const uint8 *stream, int32 size, uint32 *len)
+int32 MQTT_ReadLength(const char *stream, int32 size, uint32 *len)
 {
 	
 	int32 i;
-	const uint8 *in = stream;
+	const char *in = stream;
 	uint32 multiplier = 1;
 
 	*len = 0;
@@ -173,7 +173,7 @@ int32 MQTT_ReadLength(const uint8 *stream, int32 size, uint32 *len)
 //
 //	说明：		
 //==========================================================
-uint8 MQTT_UnPacketRecv(uint8 *dataPtr)
+uint8 MQTT_UnPacketRecv(char *dataPtr)
 {
 	
 	uint8 status = 255;
@@ -184,7 +184,7 @@ uint8 MQTT_UnPacketRecv(uint8 *dataPtr)
 	
 	if(type == MQTT_PKT_PUBLISH)
 	{
-		uint8 *msgPtr;
+		char *msgPtr;
 		uint32 remain_len = 0;
 		
 		msgPtr = dataPtr + MQTT_ReadLength(dataPtr + 1, 4, &remain_len) + 1;
@@ -430,7 +430,7 @@ uint1 MQTT_PacketDisConnect(MQTT_PACKET_STRUCTURE *mqttPacket)
 //
 //	说明：		
 //==========================================================
-uint8 MQTT_UnPacketConnectAck(uint8 *rev_data)
+uint8 MQTT_UnPacketConnectAck(char *rev_data)
 {
 
 	if(rev_data[1] != 2)
@@ -555,7 +555,7 @@ uint1 MQTT_PacketSaveBinData(const int8 *name, int16 file_len, MQTT_PACKET_STRUC
 //
 //	说明：		
 //==========================================================
-uint8 MQTT_UnPacketCmd(uint8 *rev_data, int8 **cmdid, int8 **req, uint16 *req_len)
+uint8 MQTT_UnPacketCmd(char *rev_data, int8 **cmdid, int8 **req, uint16 *req_len)
 {
 
 	int8 *dataPtr = strchr((int8 *)rev_data + 6, '/');	//加6是跳过头信息
@@ -1028,11 +1028,11 @@ uint8 MQTT_PacketPublish(uint16 pkt_id, const int8 *topic,
 //
 //	说明：		
 //==========================================================
-uint8 MQTT_UnPacketPublish(uint8 *rev_data, int8 **topic, uint16 *topic_len, int8 **payload, uint16 *payload_len, uint8 *qos, uint16 *pkt_id)
+uint8 MQTT_UnPacketPublish(char *rev_data, int8 **topic, uint16 *topic_len, int8 **payload, uint16 *payload_len, uint8 *qos, uint16 *pkt_id)
 {
 	
 	const int8 flags = rev_data[0] & 0x0F;
-	uint8 *msgPtr;
+	char *msgPtr;
 	uint32 remain_len = 0;
 
 	const int8 dup = flags & 0x08;

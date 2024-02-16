@@ -268,7 +268,7 @@ _Bool OneNET_RegisterDevice(void)
 	
 	UsartPrintf(USART_DEBUG, send_ptr);
 	
-	ESP8266_SendData((unsigned char *)send_ptr, strlen(send_ptr));
+	ESP8266_SendData((char *)send_ptr, strlen(send_ptr));
 	
 	/*
 	{
@@ -328,7 +328,7 @@ _Bool OneNet_DevLink(void)
 	
 	MQTT_PACKET_STRUCTURE mqttPacket = {NULL, 0, 0, 0};					//协议包
 
-	unsigned char *dataPtr;
+  char *dataPtr;
 	
 	char authorization_buf[160];
 	
@@ -433,11 +433,11 @@ unsigned char OneNet_FillBuf(char *buf)
 void OneNet_SendData(void)
 {
 	
-	MQTT_PACKET_STRUCTURE mqttPacket = {NULL, 0, 0, 0};												//协议包
+	//MQTT_PACKET_STRUCTURE mqttPacket = {NULL, 0, 0, 0};												//协议包
 	
 	char buf[256];
 	
-	short body_len = 0, i = 0;
+	short body_len = 0;
 	
 	UsartPrintf(USART_DEBUG, "Tips:	OneNet_SendData-MQTT\r\n");
 	
@@ -445,21 +445,24 @@ void OneNet_SendData(void)
 	
 	body_len = OneNet_FillBuf(buf);																	//获取当前需要发送的数据流的总长度
 	
-	if(body_len)
-	{
-		if(MQTT_PacketSaveData(PROID, DEVICE_NAME, body_len, NULL, &mqttPacket) == 0)				//封包
-		{
-			for(; i < body_len; i++)
-				mqttPacket._data[mqttPacket._len++] = buf[i];
+	
+	ESP8266_SendData(buf, body_len);
+	//ESP8266_SendCmd("AT+QMTSUB=0,1,\"$sys/470285/my_first_device/cmd/#\",0\r\n","OK")//消息订阅
+	//if(body_len)
+	//{
+	//	if(MQTT_PacketSaveData(PROID, DEVICE_NAME, body_len, NULL, &mqttPacket) == 0)				//封包
+	//	{
+	//		for(; i < body_len; i++)
+	//			mqttPacket._data[mqttPacket._len++] = buf[i];
 			
-			ESP8266_SendData(mqttPacket._data, mqttPacket._len);									//上传数据到平台
-			UsartPrintf(USART_DEBUG, "Send %d Bytes\r\n", mqttPacket._len);
+	//		ESP8266_SendData(mqttPacket._data, mqttPacket._len);									//上传数据到平台
+	//		UsartPrintf(USART_DEBUG, "Send %d Bytes\r\n", mqttPacket._len);
 			
-			MQTT_DeleteBuffer(&mqttPacket);															//删包
-		}
-		else
-			UsartPrintf(USART_DEBUG, "WARN:	EDP_NewBuffer Failed\r\n");
-	}
+	//		MQTT_DeleteBuffer(&mqttPacket);															//删包
+	//	}
+	//	else
+	//		UsartPrintf(USART_DEBUG, "WARN:	EDP_NewBuffer Failed\r\n");
+	//}
 	
 }
 
@@ -570,92 +573,36 @@ void OneNET_Subscribe(const char * topic,...)
 //
 //	说明：		
 //==========================================================
-void OneNet_RevPro(unsigned char *cmd)
+void OneNet_RevPro(char *str)
 {
-	
-	char *req_payload = NULL;
-	char *cmdid_topic = NULL;
-	
-	unsigned short topic_len = 0;
-	unsigned short req_len = 0;
-	
-	unsigned char qos = 0;
-	static unsigned short pkt_id = 0;
-	
-	unsigned char type = 0;
-	
-	short result = 0;
-
+	char* strtmp = strtok(str, " ,");
+	char* strarr[5]={NULL};
+	char index=0;
 	char *dataPtr = NULL;
 	char numBuf[10];
 	int num = 0;
+	char *req_payload = NULL;
+	char *cmdid_topic = NULL;
+	static char buffer[96];
 	
-	type = MQTT_UnPacketRecv(cmd);
-	switch(type)
+	while (strtmp != NULL)
 	{
-		case MQTT_PKT_PUBLISH:																//接收的Publish消息
-		
-			result = MQTT_UnPacketPublish(cmd, &cmdid_topic, &topic_len, &req_payload, &req_len, &qos, &pkt_id);
-			if(result == 0)
-			{
-				char *data_ptr = NULL;
-				
-				UsartPrintf(USART_DEBUG, "topic: %s, topic_len: %d, payload: %s, payload_len: %d\r\n",
-																	cmdid_topic, topic_len, req_payload, req_len);
-				
-				data_ptr = strstr(cmdid_topic, "request/");									//查找cmdid
-				if(data_ptr)
-				{
-					char topic_buf[80], cmdid[40];
-					
-					data_ptr = strchr(data_ptr, '/');
-					data_ptr++;
-					
-					memcpy(cmdid, data_ptr, 36);											//复制cmdid
-					cmdid[36] = 0;
-					
-					snprintf(topic_buf, sizeof(topic_buf), "$sys/%s/%s/cmd/response/%s",
-															PROID, DEVICE_NAME, cmdid);
-					OneNET_Publish(topic_buf, "ojbk");										//回复命令
-				}
-			}
-			
-		case MQTT_PKT_PUBACK:														//发送Publish消息，平台回复的Ack
-		
-			if(MQTT_UnPacketPublishAck(cmd) == 0)
-				UsartPrintf(USART_DEBUG, "Tips:	MQTT Publish Send OK\r\n");
-			
-		break;
-		
-		case MQTT_PKT_SUBACK:																//发送Subscribe消息的Ack
-		
-			if(MQTT_UnPacketSubscribe(cmd) == 0)
-				UsartPrintf(USART_DEBUG, "Tips:	MQTT Subscribe OK\r\n");
-			else
-				UsartPrintf(USART_DEBUG, "Tips:	MQTT Subscribe Err\r\n");
-		
-		break;
-		
-		case MQTT_PKT_PINGRESP:		
-			if(MQTT_UnPacketPing(cmd) == 0)
-				;
-			else
-				OneNet_ping();									//再次心跳请求
-		break;
-			
-		default:
-			result = -1;
-		break;
+		strarr[index]=strtmp;
+		//printf("%s\n", strarr[index]);
+		index++;
+		strtmp = strtok(NULL, " ,");
+		if(NULL == strtmp)
+			break;	
 	}
+
 	
-	ESP8266_Clear();									//清空缓存
-	
-	if(result == -1)
-		return;
+	req_payload = strarr[4];
+	replace_all(strarr[2],"request", "response");
+	cmdid_topic = strarr[2];
 	
 	dataPtr = strchr(req_payload, ':');					//搜索':'
 
-	if(dataPtr != NULL && result != -1)					//如果找到了
+	if(dataPtr != NULL)					//如果找到了
 	{
 		dataPtr++;
 		
@@ -712,14 +659,23 @@ void OneNet_RevPro(unsigned char *cmd)
 				LedB15_Set(LED_OFF);
 			}
 		}
+		
+		
+		sprintf(buffer, "AT+QMTPUBEX=%d,%d,%d,%d,%s,%d\r\n", 0,0,0,0,cmdid_topic,4);
+	
+		UsartPrintf(USART_DEBUG, "%s",buffer);
+		while(ESP8266_SendCmd(buffer,">"))//反馈回执
+		{
+			;
+		}
+		UsartPrintf(USART_DEBUG, "ojbk\r\n");
+		while(ESP8266_SendCmd("ojbk\r\n","OK"))//回执信息
+		{
+			;
+		}
+			
 	}
-
-	if(type == MQTT_PKT_CMD || type == MQTT_PKT_PUBLISH)
-	{
-		MQTT_FreeBuffer(cmdid_topic);
-		MQTT_FreeBuffer(req_payload);
-	}
-
+	ESP8266_Clear();									//清空缓存
 }
 
 //==========================================================
@@ -744,4 +700,28 @@ void OneNet_ping(void)
 			MQTT_DeleteBuffer(&mqtt_packet);																//删包
 	}	
 
+}
+
+
+void replace_all(char *str, const char *orig, const char *rep) 
+{
+	// 1. 定义一个静态变量buffer来存储替换后的字符串
+	static char buffer[96];
+	// 2. 使用指针p指向原始字符串str，并获取orig和rep的长度。
+	char *p = str;
+	size_t orig_len = strlen(orig);
+	size_t rep_len = strlen(rep);
+	// 3. 在循环中中，使用strstr函数查找orig在p指向的位置开始之后第一次出现的位置、
+	while ((p = strstr(p, orig))) {
+		// 如果找到了，则将该位置之前的部分拷贝到buffer中，
+		strncpy(buffer, str, p - str);
+		buffer[p - str] = '\0';
+		// 并使用sprintf函数将替换后的新子串和剩余字符串拼接起来，
+		sprintf(buffer + (p - str), "%s%s", rep, p + orig_len);
+		// 最后再将结果拷贝回原始字符串中。
+		strcpy(str, buffer);
+		// 4.更新指针p的位置，使其指向新的字符串中下一个需要替换的子串之后的位置，
+		// 并重复步3直到无法再找到需要替换的子由为止
+		p = str + (p - str) + rep_len;
+	}
 }

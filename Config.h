@@ -17,6 +17,9 @@
 //Éè±¸Ãû³Æ
 #define DEVICE_NAME		"my_first_device"
 
+#define EC800M_ONENET_INFO		"AT+QMTCFG=\"onenet\",0,\"470285\",\"TmZ5csCJjqGS/Q1QaWwtY0cB+mWY3BEZQz1Ml52NiuQ=\"\r\n"
+#define EC800M_DEVICE_INFO		"AT+QMTCONN=0,\"my_first_device\"\r\n"
+
 
 extern unsigned char esp8266_buf[512];
 extern double power;

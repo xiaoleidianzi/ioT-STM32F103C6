@@ -2,7 +2,7 @@
 	************************************************************
 	************************************************************
 	************************************************************
-	*	文件名： 	esp8266.c
+	*	文件名： 	EC800M.c
 	*
 	*	作者： 		张继瑞
 	*
@@ -10,7 +10,7 @@
 	*
 	*	版本： 		V1.0
 	*
-	*	说明： 		ESP8266的简单驱动
+	*	说明： 		EC800M的简单驱动
 	*
 	*	修改记录：	
 	************************************************************
@@ -22,7 +22,7 @@
 #include "stm32f10x.h"
 
 //网络设备驱动
-#include "esp8266.h"
+#include "EC800M.h"
 
 //硬件驱动
 #include "delay.h"
@@ -108,7 +108,7 @@ _Bool ESP8266_SendCmd(char *cmd, char *res)
 	
 	unsigned char timeOut = 200;
 
-	Usart_SendString(USART2, cmd, strlen((const char *)cmd));
+	Usart_SendString(USART2, (unsigned char *)cmd, strlen((const char *)cmd));
 	
 	while(timeOut--)
 	{
@@ -141,19 +141,13 @@ _Bool ESP8266_SendCmd(char *cmd, char *res)
 //
 //	说明：		
 //==========================================================
-void ESP8266_SendData(char *data, unsigned short len)
+void ESP8266_SendData(unsigned char *data, unsigned short len)
 {
 
-	char cmdBuf[64];
-	//char cmdid_topic[64];
+	char cmdBuf[32];
+	
 	ESP8266_Clear();								//清空接收缓存
-	
-	
-	
-	//sprintf(cmdid_topic,"$sys/470285/my_first_device/dp/post/json");
-	sprintf(cmdBuf, "AT+QMTPUBEX=%d,%d,%d,%d,%s,%d\r\n", 0,0,0,0,"$sys/470285/my_first_device/dp/post/json",len);
-	
-	//sprintf(cmdBuf, "AT+CIPSEND=%d\r\n", len);		//发送命令
+	sprintf(cmdBuf, "AT+CIPSEND=%d\r\n", len);		//发送命令
 	if(!ESP8266_SendCmd(cmdBuf, ">"))				//收到‘>’时可以发送数据
 	{
 		Usart_SendString(USART2, data, len);		//发送设备连接请求数据
@@ -173,7 +167,7 @@ void ESP8266_SendData(char *data, unsigned short len)
 //	说明：		不同网络设备返回的格式不同，需要去调试
 //				如ESP8266的返回格式为	"+IPD,x:yyy"	x代表数据长度，yyy是数据内容
 //==========================================================
-char *ESP8266_GetIPD(unsigned short timeOut)
+unsigned char *ESP8266_GetIPD(unsigned short timeOut)
 {
 
 	char *ptrIPD = NULL;
@@ -182,7 +176,7 @@ char *ESP8266_GetIPD(unsigned short timeOut)
 	{
 		if(ESP8266_WaitRecive() == REV_OK)								//如果接收完成
 		{
-			ptrIPD = strstr((char *)esp8266_buf, "+QMTRECV:");				//搜索“QMTRECV”头
+			ptrIPD = strstr((char *)esp8266_buf, "IPD,");				//搜索“IPD”头
 			if(ptrIPD == NULL)											//如果没找到，可能是IPD头的延迟，还是需要等待一会，但不会超过设定的时间
 			{
 				//UsartPrintf(USART_DEBUG, "\"IPD\" not found\r\n");
@@ -193,7 +187,7 @@ char *ESP8266_GetIPD(unsigned short timeOut)
 				if(ptrIPD != NULL)
 				{
 					ptrIPD++;
-					return (char *)(ptrIPD);
+					return (unsigned char *)(ptrIPD);
 				}
 				else
 					return NULL;

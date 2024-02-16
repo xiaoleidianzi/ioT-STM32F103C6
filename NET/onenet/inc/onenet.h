@@ -14,8 +14,10 @@ void OneNet_SendData(void);
 //void OneNET_Subscribe(void);
 void OneNET_Subscribe(const char * topic,...);
 	
-void OneNet_RevPro(unsigned char *cmd);
+void OneNet_RevPro(char *cmd);
 
 void OneNet_ping(void);
+
+void replace_all(char *str, const char *orig, const char *rep); 
 
 #endif
