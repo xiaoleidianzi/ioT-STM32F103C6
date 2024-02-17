@@ -33,7 +33,8 @@
 #include "beep.h"
 #include "key.h"
 #include "usart.h"
-
+#include "Electromotor.h"
+#include "DHT11.h"
 //配置库
 #include "Config.h"
 //C库
@@ -51,8 +52,8 @@ vu16 ADCConvertedValue[4];
 double power=0.0;				//电压
 double temperatrue=0.0;	//温度
 
-
-
+double DHT_temp=0.0;	//温度
+double DHT_humi=0.0;	//湿度
 /*
 ************************************************************
 *	函数名称：	Hardware_Init
@@ -85,9 +86,14 @@ void Hardware_Init(void)
 	
 	Led_Init();										//LED初始化
 	
+	Electromotor_Init();							//电机驱动初始化
+
 	//Beep_Init();									//蜂鸣器初始化
 	
 	//Key_Init();										//按键初始化
+	
+	DHT11_Init();									//温湿度传感器初始化
+	
 	
 	UsartPrintf(USART_DEBUG, " Hardware init OK\r\n");
 	
@@ -111,6 +117,8 @@ int main(void)
 		
 	unsigned short timeCount = 0;	//发送间隔变量	
 	unsigned char *dataPtr = NULL;
+	char temp[2] ;
+	char humi[2];
 	
 	Hardware_Init();					//初始化外围硬件
 	ESP8266_Init();						//初始化ESP8266	
@@ -125,25 +133,41 @@ int main(void)
 	
 	OneNET_Subscribe("$sys/%s/%s/cmd/#", PROID, DEVICE_NAME);					//向平台发送订阅请求(便于后续接收系统下发指令)
 	
+	Electromotor_Enable_Set(Electromotor_ON);
+	Electromotor_Direction_Set(Electromotor_ON);
 	while(1)
 	{
 		
 		if(++timeCount >= 500)									//发送间隔5s
 		{
 			//数据处理
+			DHTll_Read_Data(temp, humi);										//读取温湿度传感器数据
+			
+			DHT_temp=(double)temp[0]+(double)temp[1]/10;
+			DHT_humi=(double)humi[0]+(double)humi[1]/10;
 			power =  (double)ADCConvertedValue[0]*3.3/4095; //电压换算
 			temperatrue =(1.43-(double)ADCConvertedValue[1]*3.3/4095)/0.0043+25 ;	//返回最近一次ADC1规则组的转换结果
 			//LED灯状态获取
 			led_status.LedB12Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_12);
 			led_status.LedB13Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_13);
 			led_status.LedB14Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_14);
-			led_status.LedB15Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_15);		
+			led_status.LedB15Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_15);	
+
 			UsartPrintf(USART_DEBUG, "OneNet_SendData\r\n");			
 			OneNet_SendData();									//向平台发送数据			
 			DelayXms(10);			
 			//OneNet_ping();									  //心跳请求		
 			timeCount = 0;
 			ESP8266_Clear();										//清空缓存
+		}
+		
+		if(timeCount%2==0)									//发送间隔5s
+		{
+			Electromotor_Pulse_Set(Electromotor_ON);	
+		}
+		else
+		{
+			Electromotor_Pulse_Set(Electromotor_OFF);
 		}
 					
 		dataPtr = ESP8266_GetIPD(0);					//获取ONENET平台返回的数据
@@ -352,6 +376,21 @@ void GPIO_Configuration(void)
 		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 		GPIO_Init(GPIOB, &GPIO_InitStructure);
 	
+	  //步进电机控制
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;					//GPIOC13-使能
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_Init(GPIOC, &GPIO_InitStructure);
+		
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;					//GPIOC14-方向
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_Init(GPIOC, &GPIO_InitStructure);
+		
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;					//GPIOC15-脉冲
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_Init(GPIOC, &GPIO_InitStructure);
                  //SWJ_CFG
     //AFIO->MAPR =(0x02<<24);
     

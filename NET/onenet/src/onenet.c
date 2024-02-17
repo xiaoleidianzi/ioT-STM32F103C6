@@ -60,6 +60,9 @@ extern unsigned char esp8266_buf[512];
 extern double power;
 extern double temperatrue;
 
+extern double DHT_temp;	//温度
+extern double DHT_humi;	//湿度
+
 /*
 ************************************************************
 *	函数名称：	OTA_UrlEncode
@@ -386,6 +389,16 @@ unsigned char OneNet_FillBuf(char *buf)
 	memset(text, 0, sizeof(text));
 	
 	strcpy(buf, "{\"id\":123,\"dp\":{");
+	
+	memset(text, 0, sizeof(text));
+	sprintf(text, "\"DHT_temp\":[{\"v\":%3f}],",DHT_temp); 
+	//sprintf(text, "\"Red_Led\":[{\"v\":%d}],", led_status.Led4Sta);
+	strcat(buf, text);
+	
+	memset(text, 0, sizeof(text));
+	sprintf(text, "\"DHT_humi\":[{\"v\":%3f}],",DHT_humi); 
+	//sprintf(text, "\"Red_Led\":[{\"v\":%d}],", led_status.Led4Sta);
+	strcat(buf, text);
 	
 	memset(text, 0, sizeof(text));
 	sprintf(text, "\"temperatrue\":[{\"v\":%3f}],",temperatrue); 

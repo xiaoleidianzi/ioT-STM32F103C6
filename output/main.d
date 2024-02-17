@@ -35,5 +35,7 @@
 .\output\main.o: .\hardware\inc\beep.h
 .\output\main.o: .\hardware\inc\key.h
 .\output\main.o: .\hardware\inc\usart.h
+.\output\main.o: .\hardware\inc\Electromotor.h
+.\output\main.o: .\DHT11.h
 .\output\main.o: .\Config.h
 .\output\main.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
