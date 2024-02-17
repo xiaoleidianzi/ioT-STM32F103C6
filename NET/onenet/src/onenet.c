@@ -57,7 +57,9 @@ char key[48];
 
 
 extern unsigned char esp8266_buf[512];
-extern double power;
+
+extern double MQ2;
+extern double MQ4;
 extern double temperatrue;
 
 extern double DHT_temp;	//ÎÂ¶È
@@ -407,7 +409,12 @@ unsigned char OneNet_FillBuf(char *buf)
 	
 	memset(text, 0, sizeof(text));
 	//sprintf(text, "\"power\":%3f",power); 
-	sprintf(text, "\"power\":[{\"v\":%3f}],",power); 
+	sprintf(text, "\"MQ2\":[{\"v\":%3f}],",MQ2); 
+	strcat(buf, text);
+	
+	memset(text, 0, sizeof(text));
+	//sprintf(text, "\"power\":%3f",power); 
+	sprintf(text, "\"MQ4\":[{\"v\":%3f}],",MQ4); 
 	strcat(buf, text);
 	
 	memset(text, 0, sizeof(text));

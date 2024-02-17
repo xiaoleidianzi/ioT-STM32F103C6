@@ -49,7 +49,9 @@ void RCC_Configuration(void);
 void ADC_Init_B0(void);
 vu16 ADCConvertedValue[4];
 #define ADC1_DR_Address    ((u32)0x4001244C)
-double power=0.0;				//电压
+double MQ2=0.0;				  //气体
+double MQ4=0.0;				  //烟雾
+
 double temperatrue=0.0;	//温度
 
 double DHT_temp=0.0;	//温度
@@ -117,7 +119,7 @@ int main(void)
 		
 	unsigned short timeCount = 0;	//发送间隔变量	
 	unsigned char *dataPtr = NULL;
-	char temp[2] ;
+	char temp[2];
 	char humi[2];
 	
 	Hardware_Init();					//初始化外围硬件
@@ -143,9 +145,11 @@ int main(void)
 			//数据处理
 			DHTll_Read_Data(temp, humi);										//读取温湿度传感器数据
 			
-			DHT_temp=(double)temp[0]+(double)temp[1]/10;
-			DHT_humi=(double)humi[0]+(double)humi[1]/10;
-			power =  (double)ADCConvertedValue[0]*3.3/4095; //电压换算
+			DHT_temp=(double)temp[0]+(double)temp[1]/10.0;
+			DHT_humi=(double)humi[0]+(double)humi[1]/10.0;
+			MQ2 =  (double)ADCConvertedValue[0]/4096.0-0.01; //气体浓度
+			MQ4 =  (double)ADCConvertedValue[2]/4096.0-0.01; //气体浓度
+			
 			temperatrue =(1.43-(double)ADCConvertedValue[1]*3.3/4095)/0.0043+25 ;	//返回最近一次ADC1规则组的转换结果
 			//LED灯状态获取
 			led_status.LedB12Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_12);
@@ -360,8 +364,9 @@ void GPIO_Configuration(void)
     GPIO_Init(GPIOC, &GPIO_InitStructure);
     
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;//reset
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    //GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    //GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
     
 		//ADC电压输入
@@ -429,13 +434,14 @@ void ADC_Init_B0(void)
       ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;			//连续转换
       ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;//外部触发禁止
       ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;	//数据右对齐
-      ADC_InitStructure.ADC_NbrOfChannel = 2;									//用于转换的通道数
+      ADC_InitStructure.ADC_NbrOfChannel = 4;									//用于转换的通道数
       ADC_Init(ADC1, &ADC_InitStructure);											//配置上述参数
       ADC_TempSensorVrefintCmd(ENABLE);												//使能温度采集通道
       /* ADC1 regular channel14 configuration */ 
 			//规则模式通道配置
-      ADC_RegularChannelConfig(ADC1, ADC_Channel_14, 1, ADC_SampleTime_239Cycles5);	//电压采集
+      ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_239Cycles5);	//气体浓度采集
       ADC_RegularChannelConfig(ADC1, ADC_Channel_16, 2, ADC_SampleTime_239Cycles5); //温度采集
+			ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 3, ADC_SampleTime_239Cycles5);	//烟雾浓度采集
       //ADC_RegularChannelConfig(ADC1, ADC_Channel_17, 3, ADC_SampleTime_239Cycles5);
       /* Enable ADC1 DMA */
       ADC_DMACmd(ADC1, ENABLE);
