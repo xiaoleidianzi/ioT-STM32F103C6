@@ -88,9 +88,9 @@ void Hardware_Init(void)
 	
 	Led_Init();										//LED初始化
 	
-	Electromotor_Init();							//电机驱动初始化
+	//Electromotor_Init();							//电机驱动初始化
 
-	//Beep_Init();									//蜂鸣器初始化
+	Beep_Init();									//蜂鸣器初始化
 	
 	//Key_Init();										//按键初始化
 	
@@ -135,28 +135,42 @@ int main(void)
 	
 	OneNET_Subscribe("$sys/%s/%s/cmd/#", PROID, DEVICE_NAME);					//向平台发送订阅请求(便于后续接收系统下发指令)
 	
-	Electromotor_Enable_Set(Electromotor_ON);
-	Electromotor_Direction_Set(Electromotor_ON);
+	//Electromotor_Enable_Set(Electromotor_ON);
+	//Electromotor_Direction_Set(Electromotor_ON);
+	//Beep_Set(BEEP_ON);
+	//DelayXms(500);
+	//Beep_Set(BEEP_OFF);
 	while(1)
 	{
 		
+		//数据处理
+		DHTll_Read_Data(temp, humi);										//读取温湿度传感器数据
+		
+		DHT_temp=(double)temp[0]+(double)temp[1]/10.0;
+		DHT_humi=(double)humi[0]+(double)humi[1]/10.0;
+		MQ2 =  (double)ADCConvertedValue[0]/4096.0-0.01; //气体浓度
+		MQ4 =  (double)ADCConvertedValue[2]/4096.0-0.01; //气体浓度
+		
+		if((MQ2 > 0.4)||(MQ4 > 0.4))
+		{
+				Beep_Set(BEEP_ON);
+		}
+		else
+		{
+				Beep_Set(BEEP_OFF);
+		}
+		
+		temperatrue =(1.43-(double)ADCConvertedValue[1]*3.3/4095)/0.0043+25 ;	//返回最近一次ADC1规则组的转换结果
+		//LED灯状态获取
+		led_status.LedB12Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_12);
+		led_status.LedB13Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_13);
+		led_status.LedB14Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_14);
+		led_status.LedB15Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_15);	
+		
+		
 		if(++timeCount >= 500)									//发送间隔5s
 		{
-			//数据处理
-			DHTll_Read_Data(temp, humi);										//读取温湿度传感器数据
 			
-			DHT_temp=(double)temp[0]+(double)temp[1]/10.0;
-			DHT_humi=(double)humi[0]+(double)humi[1]/10.0;
-			MQ2 =  (double)ADCConvertedValue[0]/4096.0-0.01; //气体浓度
-			MQ4 =  (double)ADCConvertedValue[2]/4096.0-0.01; //气体浓度
-			
-			temperatrue =(1.43-(double)ADCConvertedValue[1]*3.3/4095)/0.0043+25 ;	//返回最近一次ADC1规则组的转换结果
-			//LED灯状态获取
-			led_status.LedB12Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_12);
-			led_status.LedB13Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_13);
-			led_status.LedB14Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_14);
-			led_status.LedB15Sta = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_15);	
-
 			UsartPrintf(USART_DEBUG, "OneNet_SendData\r\n");			
 			OneNet_SendData();									//向平台发送数据			
 			DelayXms(10);			
@@ -165,7 +179,7 @@ int main(void)
 			ESP8266_Clear();										//清空缓存
 		}
 		
-		if(timeCount%2==0)									//发送间隔5s
+		/*if(timeCount%2==0)									//发送间隔5s
 		{
 			Electromotor_Pulse_Set(Electromotor_ON);	
 		}
@@ -173,7 +187,7 @@ int main(void)
 		{
 			Electromotor_Pulse_Set(Electromotor_OFF);
 		}
-					
+		*/			
 		dataPtr = ESP8266_GetIPD(0);					//获取ONENET平台返回的数据
 		if(dataPtr != NULL)
 			OneNet_RevPro(dataPtr);							//解析ONENET数据

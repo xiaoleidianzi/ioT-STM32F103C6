@@ -22,7 +22,7 @@ Dialog DLL:      TCM.DLL V1.14.2.0
  
 <h2>Project:</h2>
 D:\I\物联网\STM32F103C6T6\MQTTS_LED_WX_APP\stm32f103.uvprojx
-Project File Date:  02/03/2024
+Project File Date:  02/17/2024
 
 <h2>Output:</h2>
 Rebuild target 'STM32F103'
@@ -51,7 +51,7 @@ compiling base64.c...
 compiling MqttKit.c...
 compiling esp8266.c...
 linking...
-Program Size: Code=30948 RO-data=1336 RW-data=112 ZI-data=9952  
+Program Size: Code=31196 RO-data=1336 RW-data=120 ZI-data=9952  
 FromELF: creating hex file...
 ".\output\stm32f103.axf" - 0 Error(s), 0 Warning(s).
 
@@ -80,9 +80,9 @@ Package Vendor: Keil
       Source file:   CMSIS\UserCodeTemplates\ARM\ITM_Retarget.c
 
    * Component: Keil::Device:Startup:1.0.0
-      Source file:   Device\Source\ARM\startup_stm32f10x_ld.s
       Source file:   Device\Source\system_stm32f10x.c
       Source file:   Device\Source\ARM\STM32F1xx_OPT.s
+      Source file:   Device\Source\ARM\startup_stm32f10x_ld.s
       Include file:  RTE_Driver\Config\RTE_Device.h
 Load "D:\\I\\物联网\\STM32F103C6T6\\MQTTS_LED_WX_APP\\output\\stm32f103.axf" 
 Set JLink Project File to "D:\I\物联网\STM32F103C6T6\MQTTS_LED_WX_APP\JLinkSettings.ini"
@@ -116,42 +116,10 @@ JTAG speed: 4000 kHz
 Erase Done.
 Programming Done.
 Verify OK.
-Load "D:\\I\\物联网\\STM32F103C6T6\\MQTTS_LED_WX_APP\\output\\stm32f103.axf" 
-Set JLink Project File to "D:\I\物联网\STM32F103C6T6\MQTTS_LED_WX_APP\JLinkSettings.ini"
-* JLink Info: Device "STM32F103C6" selected (32 KB flash, 10 KB RAM).
- 
-JLink info:
-------------
-DLL: V4.91b, compiled Sep 15 2014 09:17:56
-Firmware: J-Link ARM V8 compiled Nov 28 2014 13:44:46
-Hardware: V8.00
-Feature(s) : RDI,FlashDL,FlashBP,JFlash,GDB 
- 
-* JLink Info: Found SWD-DP with ID 0x1BA01477
-* JLink Info: Found SWD-DP with ID 0x1BA01477
-* JLink Info: Found Cortex-M3 r1p1, Little endian.
-* JLink Info: FPUnit: 6 code (BP) slots and 2 literal slots
-* JLink Info: TPIU fitted.
-ROMTableAddr = 0xE00FF003
- 
-Target info:
-------------
-Device: STM32F103C6
-VTarget = 3.254V
-State of Pins: 
-TCK: 1, TDI: 1, TDO: 1, TMS: 1, TRES: 1, TRST: 1
-Hardware-Breakpoints: 6
-Software-Breakpoints: 8192
-Watchpoints:          4
-JTAG speed: 4000 kHz
- 
-Erase Done.
-Programming Done.
-Verify OK.
 </pre>
 </body>
 </html>
-o "D:\I\物联网\STM32F103C6T6\MQTTS_LED_WX_APP\JLinkSettings.ini"
+
 * JLink Info: Device "STM32F103C6" selected (32 KB flash, 10 KB RAM).
  
 JLink info:
@@ -182,3 +150,102 @@ JTAG speed: 4000 kHz
 Erase Done.
 Programming Done.
 Verify OK.
+PCLK1Config(RCC_HCLK_Div2);
+user\main.c(219): error:  #147: declaration is incompatible with "void RCC_PCLK1Config(uint32_t)" (declared at line 670 of ".\fwlib\inc\stm32f10x_rcc.h")
+                        RCC_PCLK1Config(RCC_HCLK_Div2);
+user\main.c(221): error:  #79: expected a type specifier
+                        RCC_PCLK2Config(RCC_HCLK_Div1);
+user\main.c(221): warning:  #77-D: this declaration has no storage class or type specifier
+                        RCC_PCLK2Config(RCC_HCLK_Div1);
+user\main.c(221): error:  #147: declaration is incompatible with "void RCC_PCLK2Config(uint32_t)" (declared at line 671 of ".\fwlib\inc\stm32f10x_rcc.h")
+                        RCC_PCLK2Config(RCC_HCLK_Div1);
+user\main.c(223): error:  #169: expected a declaration
+                }
+user\main.c(230): warning:  #12-D: parsing restarts here after previous syntax error
+        RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+user\main.c(232): error:  #79: expected a type specifier
+        RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 |RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOF | RCC_APB2Periph_ADC1 , ENABLE);
+user\main.c(232): error:  #757: constant "ENABLE" is not a type name
+        RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 |RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOF | RCC_APB2Periph_ADC1 , ENABLE);
+user\main.c(232): warning:  #77-D: this declaration has no storage class or type specifier
+        RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 |RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOF | RCC_APB2Periph_ADC1 , ENABLE);
+user\main.c(232): error:  #147: declaration is incompatible with "void RCC_APB2PeriphClockCmd(uint32_t, FunctionalState)" (declared at line 693 of ".\fwlib\inc\stm32f10x_rcc.h")
+        RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 |RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOF | RCC_APB2Periph_ADC1 , ENABLE);
+user\main.c(233): error:  #79: expected a type specifier
+        RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+user\main.c(233): error:  #757: constant "ENABLE" is not a type name
+        RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+user\main.c(233): warning:  #77-D: this declaration has no storage class or type specifier
+        RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+user\main.c(233): error:  #147: declaration is incompatible with "void RCC_APB1PeriphClockCmd(uint32_t, FunctionalState)" (declared at line 694 of ".\fwlib\inc\stm32f10x_rcc.h")
+        RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+user\main.c(235): error:  #79: expected a type specifier
+                        RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+user\main.c(235): error:  #757: constant "ENABLE" is not a type name
+                        RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+user\main.c(235): warning:  #77-D: this declaration has no storage class or type specifier
+                        RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+user\main.c(280): error:  #169: expected a declaration
+  }
+user\main.c(306): warning:  #12-D: parsing restarts here after previous syntax error
+                GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
+user\main.c(307): error:  #77-D: this declaration has no storage class or type specifier
+      GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+user\main.c(307): error:  #147: declaration is incompatible with "GPIO_InitTypeDef GPIO_InitStructure" (declared at line 44)
+      GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+user\main.c(307): error:  #65: expected a ";"
+      GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+user\main.c(308): error:  #77-D: this declaration has no storage class or type specifier
+      GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;//GPIO_Mode_AF_PP;//GPIO_Mode_Out_PP;
+user\main.c(308): error:  #147: declaration is incompatible with "GPIO_InitTypeDef GPIO_InitStructure" (declared at line 307)
+      GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;//GPIO_Mode_AF_PP;//GPIO_Mode_Out_PP;
+user\main.c: 18 warnings, 30 errors
+compiling onenet.c...
+compiling hmac_sha1.c...
+compiling base64.c...
+compiling MqttKit.c...
+compiling esp8266.c...
+".\output\stm32f103.axf" - 30 Error(s), 18 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: ARM
+                http://www.keil.com/pack/ARM.CMSIS.4.2.0.pack
+                ARM::CMSIS:CORE:3.40.0
+                CMSIS (Cortex Microcontroller Software Interface Standard)
+   * Component: CORE Version: 3.40.0
+
+Package Vendor: Keil
+                http://www.keil.com/pack/Keil.STM32F1xx_DFP.2.1.0.pack
+                Keil::Device:Startup:1.0.0
+                STMicroelectronics STM32F1 Series Device Support, Drivers and Examples
+   * Component: Startup Version: 1.0.0
+
+<h2>Collection of Component include folders:</h2>
+  D:\I\物联网\STM32F103C6T6\MQTTS_LED_WX_APP\RTE
+  d:\Keil_v5\ARM\PACK\ARM\CMSIS\4.2.0\CMSIS\Include
+  d:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.1.0
+
+<h2>Collection of Component Files used:</h2>
+
+   * Component: ARM::CMSIS:CORE:3.40.0
+      Source file:   CMSIS\UserCodeTemplates\ARM\ITM_Retarget.c
+
+   * Component: Keil::Device:Startup:1.0.0
+      Source file:   Device\Source\system_stm32f10x.c
+      Source file:   Device\Source\ARM\STM32F1xx_OPT.s
+      Source file:   Device\Source\ARM\startup_stm32f10x_ld.s
+      Include file:  RTE_Driver\Config\RTE_Device.h
+Target not created.
+AH  Required=03H) !
+Contents mismatch at: 08007FDBH  (Flash=AAH  Required=04H) !
+Contents mismatch at: 08007FDCH  (Flash=AAH  Required=06H) !
+Contents mismatch at: 08007FDDH  (Flash=AAH  Required=07H) !
+Contents mismatch at: 08007FDEH  (Flash=AAH  Required=08H) !
+Contents mismatch at: 08007FDFH  (Flash=AAH  Required=09H) !
+Contents mismatch at: 08007FE0H  (Flash=AAH  Required=02H) !
+Contents mismatch at: 08007FE1H  (Flash=AAH  Required=04H) !
+Contents mismatch at: 08007FE2H  (Flash=AAH  Required=06H) !
+Contents mismatch at: 08007FE3H  (Flash=AAH  Required=08H) !
+Too many errors to display !
+Error: Flash Download failed  -  "Cortex-M3"

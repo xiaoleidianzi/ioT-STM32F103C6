@@ -49,7 +49,7 @@ void Beep_Init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);		//打开GPIOB的时钟
 	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-    GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);	//禁止JTAG功能
+  GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);	//禁止JTAG功能
 	
 	gpio_initstruct.GPIO_Mode = GPIO_Mode_Out_PP;				//设置为输出
 	gpio_initstruct.GPIO_Pin = GPIO_Pin_3;						//将初始化的Pin脚
